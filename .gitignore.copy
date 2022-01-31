@@ -1,0 +1,8 @@
+/.gitignore
+/.clang-format
+/.clang-tidy
+/.cmake-lint
+/.vscode
+/.vscode/**
+/build
+/build/**
