@@ -19,7 +19,7 @@ There is some amount of boilerplate associated with setting up the repo for a ne
 
 Tha provided automation mechanism also facilitates the reuse of the files in group (1) above between projects.
 
-Finally, the mechanism is relatively simple and allows for new boilerplate specific to your projects. Fork away!
+Finally, the mechanism is relatively simple and allows for new boilerplate specific to your projects. You can fork the repo and make it your own.
 
 # Minimal Example
 
@@ -193,7 +193,8 @@ And then examining the `build/testing123` directory.
 
 Note that exporting library targets to be installed requires the `KyDepsPackageLibraryTarget(...)` one-liner and a fully working example is available at https://github.com/kydeps/ky_temp_path.
 
+# Make it Your Own!
 
+This is not complicated machinery. It is a repo that contains mostly templates and you can fork it and customize the templates. 
 
-
-
+You can even add more templates to suit your specific needs. Get in touch if you have trouble doing it!

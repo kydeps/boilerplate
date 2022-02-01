@@ -1,2 +1,0 @@
-/Users/kamen/work/boilerplate/build/CMakeFiles/edit_cache.dir
-/Users/kamen/work/boilerplate/build/CMakeFiles/rebuild_cache.dir

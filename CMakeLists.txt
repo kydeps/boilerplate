@@ -11,6 +11,21 @@ option(KYDEPS_BOILERPLATE_LICENSE "enable adding LICENSE" ON)
 option(KYDEPS_BOILERPLATE_README "enable adding README.md" ON)
 option(KYDEPS_BOILERPLATE_SRC "enable the use of src directory" ON)
 
+# if KYDEPS_TARGETS is defined, add the definitions... ... and use "main" unless
+# the value is overriden outside
+
+if("-${KYDEPS_DEFINITIONS_GIT_REPOSITORY}-" STREQUAL "--")
+    set(KYDEPS_DEFINITIONS_GIT_REPOSITORY
+        "https://github.com/kydeps/definitions.git"
+        CACHE STRING "KyDeps definitions repository URL")
+endif()
+
+if("-${KYDEPS_DEFINITIONS_GIT_TAG}-" STREQUAL "--")
+    set(KYDEPS_DEFINITIONS_GIT_TAG
+        "main"
+        CACHE STRING "KyDeps definitions repository revision")
+endif()
+
 function(CreateSymLink2 OPTION SOURCE TARGET)
     if(${OPTION})
         set(T "${CMAKE_SOURCE_DIR}/${TARGET}")
@@ -98,8 +113,20 @@ function(KyDepsPackageLibraryTarget TARGET INCLUDE_RELATIVE_PATH)
     file(CREATE_LINK "${CMAKE_CURRENT_LIST_DIR}/include" "${INTERFACE_DIR}"
          SYMBOLIC)
 
-    install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include"
-            DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/..")
+    file(
+        GLOB_RECURSE INCLUDES FOLLOW_SYMLINKS
+        RELATIVE "${CMAKE_CURRENT_BINARY_DIR}/include"
+        "${CMAKE_CURRENT_BINARY_DIR}/include/*")
+    message(STATUS "${INCLUDES}")
+
+    foreach(INCLUDE ${INCLUDES})
+        cmake_path(GET INCLUDE PARENT_PATH INCLUDE_SUBDIR)
+        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/include/${INCLUDE}"
+                DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${INCLUDE_SUBDIR}")
+    endforeach()
+
+    # install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include"
+    #         DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/..")
 
     target_include_directories(
         "${TARGET}"
@@ -127,8 +154,7 @@ macro(KyDepsAddBoilerplate)
             message(STATUS "found clang-tidy @ ${CLANG_TIDY}")
             set(CMAKE_CXX_CLANG_TIDY
                 "${CLANG_TIDY}" "-header-filter=.*"
-                "-export-fixes=${CMAKE_BINARY_DIR}/clang-tidy.fixes"
-                PARENT_SCOPE)
+                "-export-fixes=${CMAKE_BINARY_DIR}/clang-tidy.fixes")
         else()
             message(WARNING "clang-tidy not found :(")
         endif()
@@ -155,6 +181,18 @@ macro(KyDepsAddBoilerplate)
                  "${kydeps_boilerplate_SOURCE_DIR}/.circleci/config.yml"
                  "${CMAKE_SOURCE_DIR}/.circleci/config.yml")
         endif()
+    endif()
+
+    if(NOT "-${KYDEPS_TARGETS}-" STREQUAL "--")
+        include(FetchContent)
+        FetchContent_Declare(
+            kydeps_definitions
+            #
+            # NOTE: the repo and tag below may be something you want to override
+            #
+            GIT_REPOSITORY "${KYDEPS_DEFINITIONS_GIT_REPOSITORY}"
+            GIT_TAG "${KYDEPS_DEFINITIONS_GIT_TAG}")
+        FetchContent_MakeAvailable(kydeps_definitions)
     endif()
 
     include(CTest)
